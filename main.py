@@ -4,16 +4,22 @@ import time
 import datetime
 
 def main(args):
-	#process parameters
-	if(len(args) == 2):
-		start = time.mktime(datetime.datetime.strptime(args[0], "%d/%m/%Y").timetuple())
-		end = time.mktime(datetime.datetime.strptime(args[1], "%d/%m/%Y").timetuple())
-
-
 	#input data reading
 	data = pd.read_csv("input.csv")
-	indicators = IndicatorData(data)
-	print(indicators.Data.head())
+	#AdjustData(data)
+
+	#process parameters
+	if(len(args) == 3):
+		start = time.mktime(datetime.datetime.strptime(args[1], "%d-%m-%Y").timetuple())
+		end = time.mktime(datetime.datetime.strptime(args[2], "%d-%m-%Y").timetuple())
+	else:
+		start = data.Timestamp[0]
+		end = data.Timestamp[len(data.index)-1]	
+	indicators = IndicatorData(data, start, end)	
+	indicators.CalculateMME(20)
+	indicators.CalculateIFR(14)
+	indicators.CalculateBB(20)
+	print(indicators.Solution.head())
 
 
 
