@@ -1,4 +1,5 @@
 from Indicators import *
+from Charts import *
 import sys
 import time
 import datetime
@@ -6,7 +7,7 @@ import datetime
 def main(args):
 	#input data reading
 	data = pd.read_csv("input.csv")
-	#AdjustData(data)
+	AdjustData(data)
 
 	#process parameters
 	if(len(args) == 3):
@@ -20,6 +21,10 @@ def main(args):
 	indicators.CalculateIFR(14)
 	indicators.CalculateBB(20)
 	print(indicators.Solution.head())
+	chart = Graf(indicators)
+	chart.PlotMME()
+	chart.PlotIFR()
+	chart.PlotBB()
 
 
 

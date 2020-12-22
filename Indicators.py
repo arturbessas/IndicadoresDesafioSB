@@ -37,10 +37,7 @@ class IndicatorData:
 
 
 	def CalculateIFR(self, periods):	
-		column = 'ifr' + str(periods)	
-		UD = pd.DataFrame(columns = ['timestamp', 'u', 'd'])
-		UD.timestamp = self.Solution.timestamp.copy()
-		UD.set_index('timestamp', inplace = True)
+		column = 'ifr' + str(periods)			
 		start = max(self.Solution['index'][0]-100, 0)
 		end = self.Solution['index'][len(self.Solution.index)-1]		
 		nup = 0
@@ -116,20 +113,16 @@ class IndicatorData:
 
 
 
-	def AdjustData(self):
-		for index, row in self.Data.iterrows():
-			if(not row.Close>0):
-				self.Data.drop(index)
-			else:
-				break
+def AdjustData(data):
+	for index, row in data.iterrows():
+		if(not row.Close>0):
+			data.drop(index)
+		else:
+			break
 
-		print("opassoiu")
+	data.reset_index(drop=True, inplace=True)
 
-		self.Data.reset_index(drop=True, inplace=True)
-		print("opassoiu")
+	dataux = data[(data.Close>0) == False]
 
-		dataux = self.Data[(self.Data.Close>0) == False]
-		print("opassoiu")
-
-		for i in dataux.index:
-			self.Data.at[i, "Close"] = self.Data.at[i-1, "Close"]
+	for i in dataux.index:
+		data.at[i, "Close"] = data.at[i-1, "Close"]
