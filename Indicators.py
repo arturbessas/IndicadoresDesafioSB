@@ -17,19 +17,18 @@ class IndicatorData:
 		k = 2 / (periods + 1)
 
 		start = max(self.Solution['index'][0]-periods, 0)
-
 		end = self.Solution['index'][len(self.Solution.index)-1]
 
+		#cálculo da média móvel simples para alimentar a primeira média móvel expoencial
 		mms = self.Data.loc[start:start+periods-1, 'Close'].sum() / periods
 
 		mme_prev = mms
 
 		start = start+periods-1
-
-		print(end - start)
 		
 		for i in range(start, end + 1):
 			close = self.Data.at[i, 'Close']
+			#cálculo da mme atual
 			mme = ((close - mme_prev) * k) + mme_prev
 			ts = self.Data.at[i, 'Timestamp']
 			if(ts >= self.Start):
@@ -45,24 +44,25 @@ class IndicatorData:
 		down = np.empty(0)
 
 		for i in range(start+1, end + 1):
-			#print('nup: ' + str(nup) + '; ndown: ' + str(ndown) + '; mean_u: ' + str(mean_u) + '; mean_d: ' + str(mean_d))
 
 			close = self.Data.Close[i]
 			prev = self.Data.Close[i-1]
 			ts = self.Data.Timestamp[i]
 
 			if(close > prev):
-
+				#populando o vetor de alta
 				up = np.append(up, close)						
 
 				if(len(up) > periods):
+					#remove-se o dado mais antigo
 					up = np.delete(up, 0)
 			
 			elif(close < prev):
-
+				#populando o vetor de baixa
 				down = np.append(down, close)						
 
 				if(len(down) > periods):
+					#remove-se o dado mais antigo
 					down = np.delete(down, 0)
 
 			if((ts >= self.Start) & (len(up) >= periods) & (len(down) >= periods)):
@@ -80,6 +80,7 @@ class IndicatorData:
 		#array que armazena os fechamentos dos últimos n candles
 		closes = np.empty(0)
 
+		#popula-se o array com dados anteriores ao periodo
 		for i in range(start, start + periods-1):
 			closes = np.append(closes, self.Data.Close[i])
 
@@ -91,7 +92,7 @@ class IndicatorData:
 			sd = np.std(closes)
 			mean = np.mean(closes)
 			closes = np.delete(closes, 0)
-
+			#cálculo das bandas
 			if(ts >= self.Start):
 				self.Solution.loc[self.Solution['index']==i, column_sup] = mean + 2*sd
 				self.Solution.loc[self.Solution['index']==i, column_inf] = mean - 2*sd
