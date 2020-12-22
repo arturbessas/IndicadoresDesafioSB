@@ -39,47 +39,36 @@ class IndicatorData:
 	def CalculateIFR(self, periods):	
 		column = 'ifr' + str(periods)			
 		start = max(self.Solution['index'][0]-100, 0)
-		end = self.Solution['index'][len(self.Solution.index)-1]		
-		nup = 0
-		ndown = 0		
-		mean_u = 0.0
-		mean_d = 0.0
+		end = self.Solution['index'][len(self.Solution.index)-1]	
+		#arrays que armazenam os valores de fechamento dos ultimos n candles de alta e baixa	
+		up = np.empty(0)
+		down = np.empty(0)
 
 		for i in range(start+1, end + 1):
+			#print('nup: ' + str(nup) + '; ndown: ' + str(ndown) + '; mean_u: ' + str(mean_u) + '; mean_d: ' + str(mean_d))
 
 			close = self.Data.Close[i]
+			prev = self.Data.Close[i-1]
 			ts = self.Data.Timestamp[i]
 
-			if(close > self.Data.Close[i-1]):
+			if(close > prev):
 
-				mean_u += close / periods
+				up = np.append(up, close)						
 
-				if(nup == 0):
-					firstup = close
-
-				if(nup < periods):
-					nup += 1
-
-				else:
-					mean_u -= firstup / periods
-					firstup = close
+				if(len(up) > periods):
+					up = np.delete(up, 0)
 			
-			elif(close < self.Data.Close[i-1]):
+			elif(close < prev):
 
-				mean_d += close / periods	
+				down = np.append(down, close)						
 
-				if(ndown == 0):
-					firstdown = close
+				if(len(down) > periods):
+					down = np.delete(down, 0)
 
-				if(ndown < periods):
-					ndown += 1
+			if((ts >= self.Start) & (len(up) >= periods) & (len(down) >= periods)):
 
-				else:
-					mean_d -= firstdown / periods
-					firstdown = close
+				ifr = 100 - (100 / (1 + (np.mean(up) / np.mean(down))))
 
-			if((ts >= self.Start) & (nup >= periods) & (ndown >= periods)):
-				ifr = 100 - (100 / (1 + (mean_u / mean_d)))
 				self.Solution.loc[self.Solution['index']==i, column] = ifr
 
 
@@ -88,8 +77,9 @@ class IndicatorData:
 		column_inf = 'bb' + str(periods) + 'inf'
 		start = max(self.Solution['index'][0]-periods, 0)
 		end = self.Solution['index'][len(self.Solution.index)-1]
-
+		#array que armazena os fechamentos dos últimos n candles
 		closes = np.empty(0)
+
 		for i in range(start, start + periods-1):
 			closes = np.append(closes, self.Data.Close[i])
 
@@ -126,3 +116,5 @@ def AdjustData(data):
 
 	for i in dataux.index:
 		data.at[i, "Close"] = data.at[i-1, "Close"]
+
+	data.to_csv('adjusted.csv', index = False)

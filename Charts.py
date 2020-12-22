@@ -19,7 +19,8 @@ class Graf:
 
 	def PlotIFR(self):
 		plt.title('IFR-14 BTC - ' + self.Interval)
-		plt.scatter(self.Data.timestamp, self.Data.ifr14)
+		fig = plt.figure(figsize = (10, 5))
+		plt.scatter(self.Data.timestamp, self.Data.ifr14, marker='.')
 		plt.gca().axes.get_xaxis().set_visible(False)
 		plt.savefig("ifr14.png")
 		plt.clf()

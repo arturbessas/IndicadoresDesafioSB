@@ -3,11 +3,15 @@ from Charts import *
 import sys
 import time
 import datetime
+import os.path
 
 def main(args):
 	#input data reading
-	data = pd.read_csv("input.csv")
-	AdjustData(data)
+	if(os.path.isfile('adjusted.csv')):
+		data = pd.read_csv("adjusted.csv")
+	else:
+		data = pd.read_csv("input.csv")
+		AdjustData(data)
 
 	#process parameters
 	if(len(args) == 3):
@@ -25,6 +29,7 @@ def main(args):
 	chart.PlotMME()
 	chart.PlotIFR()
 	chart.PlotBB()
+	indicators.Solution.drop(['index'], axis=1).to_csv('indicators.csv', index = False)
 
 
 
